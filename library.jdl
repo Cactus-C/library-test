@@ -1,0 +1,45 @@
+entity Book {
+  isbn String required maxlength(13)
+  name String required maxlength(100)
+  publishYear String required maxlength(4)
+  copies Integer required
+  picture String maxlength(255)
+}
+
+entity Author {
+  firstName String required maxlength(45)
+  lastName String required maxlength(45)
+}
+
+entity Client {
+  firstName String required maxlength(45)
+  lastName String required maxlength(45)
+  address String maxlength(50)
+  phone String required maxlength(13)
+}
+
+entity Publisher {
+  name String required unique maxlength(100)
+}
+
+entity BorrowedBook {
+  borrowDate Instant required
+}
+
+relationship ManyToMany {
+  Book{author(lastName)} to Author{book(name)}
+}
+
+relationship ManyToOne {
+  Book{publisher(name)} to Publisher
+}
+
+relationship ManyToOne {
+  BorrowedBook{book(name)} to Book
+  BorrowedBook{client(lastName)} to Client
+}
+
+service * with serviceClass
+dto * with mapstruct
+paginate * with pagination except Book
+paginate Book with infinite-scroll
