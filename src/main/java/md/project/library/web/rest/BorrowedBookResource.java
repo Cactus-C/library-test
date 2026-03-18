@@ -56,16 +56,12 @@ public class BorrowedBookResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    public ResponseEntity<BorrowedBookDTO> createBorrowedBook(@Valid @RequestBody BorrowedBookDTO borrowedBookDTO)
-        throws URISyntaxException {
-        LOG.debug("REST request to save BorrowedBook : {}", borrowedBookDTO);
-        if (borrowedBookDTO.getId() != null) {
-            throw new BadRequestAlertException("A new borrowedBook cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-        borrowedBookDTO = borrowedBookService.save(borrowedBookDTO);
-        return ResponseEntity.created(new URI("/api/borrowed-books/" + borrowedBookDTO.getId()))
-            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, borrowedBookDTO.getId().toString()))
-            .body(borrowedBookDTO);
+    public ResponseEntity<BorrowedBookDTO> borrowBook(@RequestBody BorrowedBookDTO borrowedBookDTO) throws URISyntaxException {
+        LOG.debug("REST request to borrow a Book : {}", borrowedBookDTO);
+
+        BorrowedBookDTO result = borrowedBookService.borrowBook(borrowedBookDTO);
+
+        return ResponseEntity.created(new URI("/api/borrowed-books/" + result.getId())).body(result);
     }
 
     /**
@@ -180,24 +176,6 @@ public class BorrowedBookResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBorrowedBook(@PathVariable("id") Long id) {
-        LOG.debug("REST request to delete BorrowedBook : {}", id);
-        borrowedBookService.delete(id);
-        return ResponseEntity.noContent()
-            .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
-            .build();
-    }
-
-    @PostMapping("/borrow")
-    //    @PreAuthorize("hasAnyAuthority('ROLE_LIBRARIAN')")
-    public ResponseEntity<BorrowedBookDTO> borrowBook(@RequestBody BorrowedBookDTO borrowedBookDTO) {
-        LOG.debug("REST request to borrow a Book : {}", borrowedBookDTO);
-        BorrowedBookDTO result = borrowedBookService.borrowBook(borrowedBookDTO);
-        return ResponseEntity.ok().body(result);
-    }
-
-    @DeleteMapping("/return/{id}")
-    //    @PreAuthorize("hasAnyAuthority('ROLE_LIBRARIAN')")
     public ResponseEntity<BorrowedBookDTO> returnBook(@PathVariable Long id) {
         LOG.debug("REST request to return a Book, BorrowedBook id : {}", id);
 
