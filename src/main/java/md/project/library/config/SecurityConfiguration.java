@@ -77,8 +77,16 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
                     .requestMatchers(mvc.pattern("/management/**")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    //
-                    .requestMatchers(mvc.pattern("/api/borrowed-books")).hasAuthority(AuthoritiesConstants.LIBRARIAN)
+                    //Admin
+                    .requestMatchers(mvc.pattern("/api/books")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/publishers")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/authors")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/clients")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    //Librarian & Admin
+                    .requestMatchers(mvc.pattern("/api/borrowed-books"))
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.LIBRARIAN)
+                    //Any user
+                    .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions ->
