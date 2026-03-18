@@ -70,6 +70,19 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/api/account/reset-password/init")).permitAll()
                     .requestMatchers(mvc.pattern("/api/account/reset-password/finish")).permitAll()
                     .requestMatchers(mvc.pattern("/api/admin/**")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    //Any user
+                    .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
+                    //Librarian & Admin
+                    .requestMatchers(mvc.pattern("/api/borrowed-books"))
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.LIBRARIAN)
+                    .requestMatchers(HttpMethod.GET, "/api/clients")
+                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.LIBRARIAN)
+                    //Admin
+                    .requestMatchers(mvc.pattern("/api/books")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/publishers")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/authors")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    .requestMatchers(mvc.pattern("/api/clients")).hasAuthority(AuthoritiesConstants.ADMIN)
+                    //
                     .requestMatchers(mvc.pattern("/api/**")).authenticated()
                     .requestMatchers(mvc.pattern("/v3/api-docs/**")).hasAuthority(AuthoritiesConstants.ADMIN)
                     .requestMatchers(mvc.pattern("/management/health")).permitAll()
@@ -77,16 +90,6 @@ public class SecurityConfiguration {
                     .requestMatchers(mvc.pattern("/management/info")).permitAll()
                     .requestMatchers(mvc.pattern("/management/prometheus")).permitAll()
                     .requestMatchers(mvc.pattern("/management/**")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    //Admin
-                    .requestMatchers(mvc.pattern("/api/books")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/publishers")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/authors")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    .requestMatchers(mvc.pattern("/api/clients")).hasAuthority(AuthoritiesConstants.ADMIN)
-                    //Librarian & Admin
-                    .requestMatchers(mvc.pattern("/api/borrowed-books"))
-                        .hasAnyAuthority(AuthoritiesConstants.ADMIN, AuthoritiesConstants.LIBRARIAN)
-                    //Any user
-                    .requestMatchers(HttpMethod.GET, "/api/books").permitAll()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptions ->
