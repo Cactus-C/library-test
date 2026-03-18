@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
@@ -185,5 +186,21 @@ public class BorrowedBookResource {
         return ResponseEntity.noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    @PostMapping("/borrow")
+    //    @PreAuthorize("hasAnyAuthority('ROLE_LIBRARIAN')")
+    public ResponseEntity<BorrowedBookDTO> borrowBook(@RequestBody BorrowedBookDTO borrowedBookDTO) {
+        LOG.debug("REST request to borrow a Book : {}", borrowedBookDTO);
+        BorrowedBookDTO result = borrowedBookService.borrowBook(borrowedBookDTO);
+        return ResponseEntity.ok().body(result);
+    }
+
+    @DeleteMapping("/return/{id}")
+    //    @PreAuthorize("hasAnyAuthority('ROLE_LIBRARIAN')")
+    public ResponseEntity<BorrowedBookDTO> returnBook(@PathVariable Long id) {
+        LOG.debug("REST request to return a Book, BorrowedBook id : {}", id);
+
+        return borrowedBookService.returnBook(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

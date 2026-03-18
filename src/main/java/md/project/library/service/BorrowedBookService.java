@@ -1,7 +1,10 @@
 package md.project.library.service;
 
+import java.time.Instant;
 import java.util.Optional;
+import md.project.library.domain.Book;
 import md.project.library.domain.BorrowedBook;
+import md.project.library.repository.BookRepository;
 import md.project.library.repository.BorrowedBookRepository;
 import md.project.library.service.dto.BorrowedBookDTO;
 import md.project.library.service.mapper.BorrowedBookMapper;
@@ -22,11 +25,17 @@ public class BorrowedBookService {
     private static final Logger LOG = LoggerFactory.getLogger(BorrowedBookService.class);
 
     private final BorrowedBookRepository borrowedBookRepository;
+    private final BookRepository bookRepository;
 
     private final BorrowedBookMapper borrowedBookMapper;
 
-    public BorrowedBookService(BorrowedBookRepository borrowedBookRepository, BorrowedBookMapper borrowedBookMapper) {
+    public BorrowedBookService(
+        BorrowedBookRepository borrowedBookRepository,
+        BookRepository bookRepository,
+        BorrowedBookMapper borrowedBookMapper
+    ) {
         this.borrowedBookRepository = borrowedBookRepository;
+        this.bookRepository = bookRepository;
         this.borrowedBookMapper = borrowedBookMapper;
     }
 
@@ -117,5 +126,42 @@ public class BorrowedBookService {
     public void delete(Long id) {
         LOG.debug("Request to delete BorrowedBook : {}", id);
         borrowedBookRepository.deleteById(id);
+    }
+
+    public BorrowedBookDTO borrowBook(BorrowedBookDTO borrowedBookDTO) {
+        LOG.debug("Request to borrow a Book: {} Client: {}", borrowedBookDTO.getBook().getId(), borrowedBookDTO.getClient().getId());
+
+        Book book = bookRepository
+            .findById(borrowedBookDTO.getBook().getId())
+            .orElseThrow(() -> new RuntimeException("Book: " + borrowedBookDTO.getClient().getId() + "not found"));
+
+        if (book.getCopies() == null || book.getCopies() <= 0) {
+            throw new RuntimeException("There is not enough stock of books.");
+        }
+
+        book.setCopies(book.getCopies() - 1);
+        bookRepository.save(book);
+
+        borrowedBookDTO.setBorrowDate(Instant.now());
+
+        BorrowedBook borrowedBook = borrowedBookMapper.toEntity(borrowedBookDTO);
+        borrowedBook = borrowedBookRepository.save(borrowedBook);
+        return borrowedBookMapper.toDto(borrowedBook);
+    }
+
+    public boolean returnBook(Long borrowedBookId) {
+        LOG.debug("Request to return Book with BorrowedBook id : {}", borrowedBookId);
+
+        if (!borrowedBookRepository.existsById(borrowedBookId)) return false;
+
+        BorrowedBook borrowedBook = borrowedBookRepository.findById(borrowedBookId).get();
+
+        Book book = borrowedBook.getBook();
+        book.setCopies(book.getCopies() + 1);
+        bookRepository.save(book);
+
+        borrowedBookRepository.deleteById(borrowedBookId);
+
+        return true;
     }
 }
