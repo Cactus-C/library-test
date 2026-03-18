@@ -2,12 +2,13 @@
 name: librarymd
 services:
   postgresql:
-    image: postgres:17.4
+    image: postgres:18
     # volumes:
     #   - ~/volumes/jhipster/librarymd/postgresql/:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_USER=librarymd
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      POSTGRES_DB: librarymd
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER}']
       interval: 5s
@@ -16,4 +17,4 @@ services:
     # If you want to expose these ports outside your dev PC,
     # remove the "127.0.0.1:" prefix
     ports:
-      - 127.0.0.1:5432:5432
+      - 127.0.0.1:5433:5432

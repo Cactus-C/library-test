@@ -617,7 +617,7 @@
                             </platforms>
                         </from>
                         <to>
-                            <image>librarymd:latest</image>
+                            <image>docker.io/dorinoxani/librarymd:latest</image>
                         </to>
                         <container>
                             <entrypoint>
